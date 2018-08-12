@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+#
+# Abort with <msg>
+#
+
+abort() {
+  echo
+  echo "  $@" 1>&2
+  echo
+  exit 1
+}
+
+if [ \( -z "$1" \) -o \( -z "$2" \) ]; then
+	abort no enough parameter
+fi
+
+repo=$1
+path=/tmp/$2
+ref="${3:-develop}"
+oldcwd=$PWD
+
+if [ -d "$path" ]; then
+	rm -rf "$path"
+fi
+
+mkdir -p "$path"
+
+echo cloning $repo @ $ref to $path
+git clone $repo $path
+cd $path
+
+git checkout $ref
+npm install
+lint_output=$(npm run lint)
+test_output=$(npm test)
+cd $oldcwd
+rm -rf $path
+echo "$lint_output" > /tmp/$2.lint
+echo "$test_output" > /tmp/$2.result

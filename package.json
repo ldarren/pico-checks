@@ -1,0 +1,23 @@
+{
+  "name": "pm2-checks",
+  "version": "0.0.2",
+  "description": "Repository checks system for PM2",
+  "main": "check.js",
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ldarren/pico-checks.git"
+  },
+  "scripts": {
+    "test": "node index.js"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "pico-common": "^0.10.9"
+  },
+  "author": "Darren Liew",
+  "license": "MIT"
+}
