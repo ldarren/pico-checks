@@ -1,5 +1,5 @@
 {
-  "name": "pm2-checks",
+  "name": "pico-git-checks",
   "version": "0.0.2",
   "description": "Repository checks system for PM2",
   "main": "check.js",
