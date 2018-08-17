@@ -32,9 +32,7 @@ cd $path
 
 git checkout $ref
 npm install
-lint_output=$(npm run lint)
-test_output=$(npm test)
+npm run lint:ci /tmp/$2.lint
+npm run test:ci > /tmp/$2.result
 cd $oldcwd
 rm -rf $path
-echo "$lint_output" > /tmp/$2.lint
-echo "$test_output" > /tmp/$2.result

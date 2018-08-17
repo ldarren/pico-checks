@@ -1,6 +1,6 @@
 {
   "name": "pico-git-checks",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Repository checks system for PM2",
   "main": "check.js",
   "engines": {
