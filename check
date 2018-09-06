@@ -17,7 +17,7 @@ fi
 
 repo=$1
 path=/tmp/$2
-cfgpath="${3:-src/config}"
+cfgpath="${3:-config/ops.env}"
 ref="${4:-develop}"
 oldcwd=$PWD
 
@@ -35,8 +35,8 @@ git checkout $ref
 
 npm ci
 
-if [ -d "$cfgpath" ]; then
-	cp "$cfgpath/*/ops.env*" .
+if [ -f "$cfgpath" ]; then
+	cp "$cfgpath" .test.env
 fi
 
 npm run lint:ci /tmp/$2.lint
