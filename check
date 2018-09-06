@@ -11,13 +11,14 @@ abort() {
   exit 1
 }
 
-if [ \( -z "$1" \) -o \( -z "$2" \) ]; then
+if [ \( -z "$1" \) -o \( -z "$2" \) -o \( -z "$3" \) ]; then
 	abort no enough parameter
 fi
 
 repo=$1
 path=/tmp/$2
-ref="${3:-develop}"
+cfgpath="${3:-src/config}"
+ref="${4:-develop}"
 oldcwd=$PWD
 
 if [ -d "$path" ]; then
@@ -31,8 +32,15 @@ git clone $repo $path
 cd $path
 
 git checkout $ref
-npm install
+
+npm ci
+
+if [ -d "$cfgpath" ]; then
+	cp "$cfgpath/*/ops.env*" .
+fi
+
 npm run lint:ci /tmp/$2.lint
 npm run test:ci > /tmp/$2.result
+
 cd $oldcwd
 rm -rf $path
