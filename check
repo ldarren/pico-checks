@@ -39,8 +39,8 @@ if [ -f "$cfgpath" ]; then
 	cp "$cfgpath" .test.env
 fi
 
-npm run lint -- --quiet --format=json --output-file /tmp/$2.lint
-npm run test -- --json --ci --forceExit --outputFile=/tmp/$2.result
+npm run lint -- --quiet --format=json --output-file /tmp/$2.lint > /tmp/$2.lint.out
+npm run test -- --json --ci --forceExit --detectOpenHandles --outputFile=/tmp/$2.test > /tmp/$2.test.out
 
 cd $oldcwd
 rm -rf $path

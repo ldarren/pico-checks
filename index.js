@@ -2,6 +2,16 @@ const fs = require('fs')
 const childProcess = require('child_process')
 const path = require('path')
 
+function readOutput(path){
+	try { return fs.readFileSync(path, 'utf8') }
+	catch (ex) {
+		try { return fs.readFileSync(path+'.out', 'utf8') }
+		catch (ex) {
+			return 0
+		}
+	}
+}
+
 /**
  * Spawn a modified version of visionmedia/deploy
  *
@@ -20,8 +30,14 @@ module.exports = function(repo, dst, cfg, ref, cb) {
 
 	proc.on('close', function (code) {
 		if (code !== 0) return cb(code)
-		const lintRes = fs.readFileSync(`/tmp/${dst}.lint`, 'utf8')
-		const testRes = fs.readFileSync(`/tmp/${dst}.result`, 'utf8')
-		cb(null, lintRes, testRes)
+		const lintRes = readOutput(`/tmp/${dst}.lint`)
+		const testRes = readOutput(`/tmp/${dst}.test`)
+		try {
+			fs.unlinkSync(`/tmp/${dst}.lint.out`)
+			fs.unlinkSync(`/tmp/${dst}.test.out`)
+			fs.unlinkSync(`/tmp/${dst}.lint`)
+			fs.unlinkSync(`/tmp/${dst}.test`)
+		} catch (exp) { }
+		cb(!lintRes || !testRes ? 'Panic! something very wrong has happened' : null, lintRes, testRes)
 	});
 }
