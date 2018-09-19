@@ -5,7 +5,7 @@ const path = require('path')
 function readOutput(path){
 	try { return fs.readFileSync(path, 'utf8') }
 	catch (ex) {
-		try { return fs.readFileSync(path+'.out', 'utf8') }
+		try { return fs.readFileSync(path+'.err', 'utf8') }
 		catch (ex) {
 			return 0
 		}
@@ -33,8 +33,8 @@ module.exports = function(repo, dst, cfg, ref, cb) {
 		const lintRes = readOutput(`/tmp/${dst}.lint`)
 		const testRes = readOutput(`/tmp/${dst}.test`)
 		try {
-			fs.unlinkSync(`/tmp/${dst}.lint.out`)
-			fs.unlinkSync(`/tmp/${dst}.test.out`)
+			fs.unlinkSync(`/tmp/${dst}.lint.err`)
+			fs.unlinkSync(`/tmp/${dst}.test.err`)
 			fs.unlinkSync(`/tmp/${dst}.lint`)
 			fs.unlinkSync(`/tmp/${dst}.test`)
 		} catch (exp) { }
