@@ -27,7 +27,7 @@ if [ -z $5 ]; then
 	DBSUFFIX=""
 	echo "skip db rotation during migration test";
 else
-	IFS=';' read -ra bases <<< "$5"
+	IFS=',' read -ra bases <<< "$5"
 	for base in "${bases[@]}"; do
 		dbnames+=("$base$DBSUFFIX")
 	done
