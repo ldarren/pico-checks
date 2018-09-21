@@ -22,14 +22,14 @@ ref="${4:-develop}"
 oldcwd=$PWD
 
 dbnames=()
-DBSUFFIX="_$RANDOM"
+export DB_NAME_SUFFIX="_$RANDOM"
 if [ -z $5 ]; then
-	DBSUFFIX=""
+	DB_NAME_SUFFIX=""
 	echo "skip db rotation during migration test";
 else
 	IFS=',' read -ra bases <<< "$5"
 	for base in "${bases[@]}"; do
-		dbnames+=("$base$DBSUFFIX")
+		dbnames+=("$base$DB_NAME_SUFFIX")
 	done
 fi
 
@@ -56,7 +56,7 @@ for dbname in "${dbnames[@]}"; do
 	mysql -e "DROP DATABASE IF EXISTS $dbname; CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 done 
 
-env-cmd .test.env DB_NAME_SUFFIX=$DBSUFFIX npm run migrate 2> /tmp/$2.migrate.err
+env-cmd .test.env npm run migrate 2> /tmp/$2.migrate.err
 npm run lint -- --quiet --format=json --output-file /tmp/$2.lint 2> /tmp/$2.lint.err
 npm run test:unit -- --json --ci --forceExit --detectOpenHandles --outputFile=/tmp/$2.unit 2> /tmp/$2.unit.err
 npm run test:inte -- --json --ci --forceExit --detectOpenHandles --outputFile=/tmp/$2.inte 2> /tmp/$2.inte.err
