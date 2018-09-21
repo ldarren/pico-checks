@@ -20,8 +20,8 @@ function readOutput(path){
  * @param {string} ref: branch or tag to be checkout
  * @callback cb
  */
-module.exports = function(repo, dst, cfg, ref, cb) {
-	const shellSyntaxCommand = path.join( __dirname.replace(/\\/g, '/'), 'check ') + `${repo} ${dst} ${cfg} ${ref}`
+module.exports = function(repo, dst, cfg, ref, dbnames, cb) {
+	const shellSyntaxCommand = path.join( __dirname.replace(/\\/g, '/'), 'check ') + `${repo} ${dst} ${cfg} ${ref} ${dbnames}`
 	const proc = childProcess.spawn('sh', ['-c', shellSyntaxCommand], { stdio: 'inherit' })
 
 	proc.on('error', cb)
@@ -30,14 +30,20 @@ module.exports = function(repo, dst, cfg, ref, cb) {
 
 	proc.on('close', function (code) {
 		if (code !== 0) return cb(code)
+		const dbmiRes = readOutput(`/tmp/${dst}.dbmi`)
 		const lintRes = readOutput(`/tmp/${dst}.lint`)
-		const testRes = readOutput(`/tmp/${dst}.test`)
+		const unitRes = readOutput(`/tmp/${dst}.unit`)
+		const inteRes = readOutput(`/tmp/${dst}.inte`)
 		try {
+			fs.unlinkSync(`/tmp/${dst}.dbmi.err`)
 			fs.unlinkSync(`/tmp/${dst}.lint.err`)
-			fs.unlinkSync(`/tmp/${dst}.test.err`)
+			fs.unlinkSync(`/tmp/${dst}.unit.err`)
+			fs.unlinkSync(`/tmp/${dst}.inte.err`)
+			fs.unlinkSync(`/tmp/${dst}.dbmi`)
 			fs.unlinkSync(`/tmp/${dst}.lint`)
-			fs.unlinkSync(`/tmp/${dst}.test`)
+			fs.unlinkSync(`/tmp/${dst}.unit`)
+			fs.unlinkSync(`/tmp/${dst}.inte`)
 		} catch (exp) { }
-		cb(!lintRes || !testRes ? 'Panic! something very wrong has happened' : null, lintRes, testRes)
+		cb(!lintRes || !unitRes || !inteRes ? 'Panic! something very wrong has happened' : null, dbmiRes, lintRes, unitRes, inteRes)
 	});
 }
