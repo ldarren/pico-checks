@@ -17,21 +17,9 @@ fi
 
 repo=$1
 path=/tmp/$2
-cfgpath="${3:-config/ops.env}"
+cfgpath=$3
 ref="${4:-develop}"
 oldcwd=$PWD
-
-dbnames=()
-export DB_NAME_SUFFIX="_$RANDOM"
-if [ -z $5 ]; then
-	DB_NAME_SUFFIX=""
-	echo "skip db rotation during migration test";
-else
-	IFS=',' read -ra bases <<< "$5"
-	for base in "${bases[@]}"; do
-		dbnames+=("$base$DB_NAME_SUFFIX")
-	done
-fi
 
 if [ -d "$path" ]; then
 	rm -rf "$path"
@@ -47,22 +35,53 @@ git checkout $ref
 
 npm ci
 
-if [ -f "$cfgpath" ]; then
-	cp "$cfgpath" .env
-	cp "$cfgpath" .test.env
+# read in CONFIG_PATH, DB cread, DB_NAMES and TESTS cases
+. "$cfgpath"
+
+if [ -f "$CONFIG_PATH" ]; then
+	cp "$CONFIG_PATH" .env
+	cp "$CONFIG_PATH" .test.env
+fi
+
+dbnames=()
+export DB_NAME_SUFFIX="_$RANDOM"
+if [ -z $DB_NAMES ]; then
+	DB_NAME_SUFFIX=""
+	echo "skip db rotation during migration test";
+else
+	IFS=',' read -ra bases <<< "$DB_NAMES"
+	for base in "${bases[@]}"; do
+		dbnames+=("$base$DB_NAME_SUFFIX")
+	done
 fi
 
 for dbname in "${dbnames[@]}"; do
-	mysql -e "DROP DATABASE IF EXISTS $dbname; CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+	mysql -h "$DB_HOST" \
+	-P "$DB_PORT" \
+	-u "$DB_USER" \
+	-p "$DB_PASS" \
+	-e "DROP DATABASE IF EXISTS $dbname; CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 done 
 
-env-cmd .test.env npm run migrate 2> /tmp/$2.migrate.err
-npm run lint -- --quiet --format=json --output-file /tmp/$2.lint 2> /tmp/$2.lint.err
-npm run test:unit -- --json --ci --forceExit --detectOpenHandles --outputFile=/tmp/$2.unit 2> /tmp/$2.unit.err
-npm run test:inte -- --json --ci --forceExit --detectOpenHandles --outputFile=/tmp/$2.inte 2> /tmp/$2.inte.err
+if [ ! -z "$TEST_DBMI" ]; then
+	eval ${TEST_DBMI/OUTPUT/"/tmp/$2.dbmi"} 2> /tmp/$2.dbmi.err
+fi
+if [ ! -z "$TEST_LINT" ]; then
+	eval ${TEST_LINT/OUTPUT/"/tmp/$2.lint"} 2> /tmp/$2.lint.err
+fi
+if [ ! -z "$TEST_UNIT" ]; then
+	eval ${TEST_UNIT/OUTPUT/"/tmp/$2.unit"} 2> /tmp/$2.unit.err
+fi
+if [ ! -z "$TEST_INTE" ]; then
+	eval ${TEST_INTE/OUTPUT/"/tmp/$2.inte"} 2> /tmp/$2.inte.err
+fi
 
 for dbname in "${dbnames[@]}"; do
-	mysql -e "DROP DATABASE IF EXISTS $dbname;"
+	mysql -h "$DB_HOST" \
+	-P "$DB_PORT" \
+	-u "$DB_USER" \
+	-p "$DB_PASS" \
+	-e "DROP DATABASE IF EXISTS $dbname;"
 done 
 
 cd $oldcwd

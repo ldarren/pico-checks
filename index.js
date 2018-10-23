@@ -20,8 +20,8 @@ function readOutput(path){
  * @param {string} ref: branch or tag to be checkout
  * @callback cb
  */
-module.exports = function(repo, dst, cfg, ref, dbnames, cb) {
-	const shellSyntaxCommand = path.join( __dirname.replace(/\\/g, '/'), 'check ') + `${repo} ${dst} ${cfg} ${ref} ${dbnames}`
+module.exports = function(repo, dst, cfgpath, ref, cb) {
+	const shellSyntaxCommand = path.join( __dirname.replace(/\\/g, '/'), 'check ') + `${repo} ${dst} ${cfgpath} ${ref}`
 	const proc = childProcess.spawn('sh', ['-c', shellSyntaxCommand], { stdio: 'inherit' })
 
 	proc.on('error', cb)
