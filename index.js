@@ -12,6 +12,13 @@ function readOutput(path){
 	}
 }
 
+function removeOutput(path){
+	try { 
+		fs.unlinkSync(path)
+		fs.unlinkSync(path + '.err')
+	} catch (ex) { }
+}
+
 /**
  * Spawn a modified version of visionmedia/deploy
  *
@@ -34,16 +41,10 @@ module.exports = function(repo, dst, cfgpath, ref, cb) {
 		const lintRes = readOutput(`/tmp/${dst}.lint`)
 		const unitRes = readOutput(`/tmp/${dst}.unit`)
 		const inteRes = readOutput(`/tmp/${dst}.inte`)
-		try {
-			fs.unlinkSync(`/tmp/${dst}.dbmi.err`)
-			fs.unlinkSync(`/tmp/${dst}.lint.err`)
-			fs.unlinkSync(`/tmp/${dst}.unit.err`)
-			fs.unlinkSync(`/tmp/${dst}.inte.err`)
-			fs.unlinkSync(`/tmp/${dst}.dbmi`)
-			fs.unlinkSync(`/tmp/${dst}.lint`)
-			fs.unlinkSync(`/tmp/${dst}.unit`)
-			fs.unlinkSync(`/tmp/${dst}.inte`)
-		} catch (exp) { }
+		removeOutput(`/tmp/${dst}.dbmi`)
+		removeOutput(`/tmp/${dst}.lint`)
+		removeOutput(`/tmp/${dst}.unit`)
+		removeOutput(`/tmp/${dst}.inte`)
 		cb(!lintRes || !unitRes || !inteRes ? 'Panic! something very wrong has happened' : null, dbmiRes, lintRes, unitRes, inteRes)
 	});
 }
