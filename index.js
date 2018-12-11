@@ -3,9 +3,12 @@ const childProcess = require('child_process')
 const path = require('path')
 
 function readOutput(path){
-	try { return fs.readFileSync(path, 'utf8') }
-	catch (ex) {
-		try { return fs.readFileSync(path+'.err', 'utf8') }
+	let output
+	try { 
+		output = fs.readFileSync(path+'.err', 'utf8')
+		output = output || fs.readFileSync(path, 'utf8')
+	} catch (ex) {
+		try { return fs.readFileSync(path, 'utf8') }
 		catch (ex) {
 			return 0
 		}
@@ -13,10 +16,10 @@ function readOutput(path){
 }
 
 function removeOutput(path){
-	try { 
-		fs.unlinkSync(path)
-		fs.unlinkSync(path + '.err')
-	} catch (ex) { }
+	try { fs.unlinkSync(path) }
+	catch (exp) { }
+	try { fs.unlinkSync(path + '.err') }
+	catch (exp) { }
 }
 
 /**
