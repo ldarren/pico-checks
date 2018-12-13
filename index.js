@@ -2,24 +2,24 @@ const fs = require('fs')
 const childProcess = require('child_process')
 const path = require('path')
 
-function readOutput(path){
+function readOutput(fpath1, fpath2){
 	let output
 	try { 
-		output = fs.readFileSync(path+'.err', 'utf8')
-		output = output || fs.readFileSync(path, 'utf8')
+		output = fs.readFileSync(fpath1, 'utf8')
+		output = output || fs.readFileSync(fpath2, 'utf8')
 	} catch (ex) {
-		try { return fs.readFileSync(path, 'utf8') }
+		try { return fs.readFileSync(fpath2, 'utf8') }
 		catch (ex) {
 			return 0
 		}
 	}
 }
 
-function removeOutput(path){
-	try { fs.unlinkSync(path) }
-	catch (exp) { }
-	try { fs.unlinkSync(path + '.err') }
-	catch (exp) { }
+function removeOutput(fpath){
+	try { fs.unlinkSync(fpath) }
+	catch (_exp) { }
+	try { fs.unlinkSync(fpath + '.err') }
+	catch (_exp) { }
 }
 
 /**
@@ -40,10 +40,14 @@ module.exports = function(repo, dst, cfgpath, ref, cb) {
 
 	proc.on('close', function (code) {
 		if (code !== 0) return cb(code)
-		const dbmiRes = readOutput(`/tmp/${dst}.dbmi`)
-		const lintRes = readOutput(`/tmp/${dst}.lint`)
-		const unitRes = readOutput(`/tmp/${dst}.unit`)
-		const inteRes = readOutput(`/tmp/${dst}.inte`)
+		const dbmi = `/tmp/${dst}.dbmi`
+		const lint = `/tmp/${dst}.lint`
+		const unit = `/tmp/${dst}.unit`
+		const inte = `/tmp/${dst}.inte`
+		const dbmiRes = readOutput(dbmi + '.err', dbmi)
+		const lintRes = readOutput(lint, lint + '.err')
+		const unitRes = readOutput(unit, unit + '.err')
+		const inteRes = readOutput(inte, inte + '.err')
 		removeOutput(`/tmp/${dst}.dbmi`)
 		removeOutput(`/tmp/${dst}.lint`)
 		removeOutput(`/tmp/${dst}.unit`)
