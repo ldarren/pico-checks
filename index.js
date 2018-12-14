@@ -3,10 +3,9 @@ const childProcess = require('child_process')
 const path = require('path')
 
 function readOutput(fpath1, fpath2){
-	let output
 	try { 
-		output = fs.readFileSync(fpath1, 'utf8')
-		output = output || fs.readFileSync(fpath2, 'utf8')
+		let output = fs.readFileSync(fpath1, 'utf8')
+		return output || fs.readFileSync(fpath2, 'utf8')
 	} catch (ex) {
 		try { return fs.readFileSync(fpath2, 'utf8') }
 		catch (ex) {
