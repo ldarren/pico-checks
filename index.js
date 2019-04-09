@@ -4,8 +4,8 @@ const path = require('path')
 
 function readOutput(fpath1, fpath2){
 	try { 
-		let output = fs.readFileSync(fpath1, 'utf8')
-		return output || fs.readFileSync(fpath2, 'utf8')
+		const output = fs.readFileSync(fpath1, 'utf8')
+		return output.trim() || fs.readFileSync(fpath2, 'utf8')
 	} catch (ex) {
 		try { return fs.readFileSync(fpath2, 'utf8') }
 		catch (ex) {
