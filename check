@@ -32,6 +32,7 @@ git clone $repo $path
 cd $path
 
 git checkout $ref
+git submodule update --init --recursive
 
 npm ci
 
